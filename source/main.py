@@ -79,7 +79,7 @@ def g(event, values):
             window.refresh()
             t=tuple(map(float,values['show_index_region'].split('-'))) if values['show_index_region'] else None
             v=''.join([v for v in 'xyz' if values[f'show_index_region_{v}']])
-            savefig(show_index(p,region=t,st=v,recalc=rc),dir=basepath+'imgs/')
+            savefig(show_index(p,region=t,st=v,recalc=rc,calcinter=True),dir=basepath+'imgs/')
         print('saved')
 
 while True:

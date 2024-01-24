@@ -76,12 +76,10 @@ show_each_region, show_indexは変わりません
 
 ## versions
 
-23/10/29 1.0.0
+23/10/29 1.0
+24/1/24 1.1
 
-pyinstaller 6.1.0
-Python 3.10.13
-macOS Ventura 13.6
+## 動作確認
 
-pyinstaller 6.1.0
-python 3.10.12
+mac Ventura 13.6
 windows 22H2
