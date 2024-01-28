@@ -16,26 +16,26 @@ from matplotlib.figure import Figure
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
     paths=[
-        r"C:\Users\4n73e\Documents\tmp\23B3\AS100T00.txt",
-        r'C:\Users\4n73e\Documents\tmp/23B3/AD025E06.txt',
-        # r'C:\Users\4n73e\Documents\tmp/23B3/ia1006sp.txt',
+        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/新しいフォルダー/AD025E06.txt'
+        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/新しいフォルダー/AD025C07.txt'
     ]
 
     # # すべてのファイルを並べる
-    # savefig(compare_nc(paths,recalc=True))
+    # fig=compare_nc(paths,recalc=True)
 
     # xyをプロット
-    savefig(compare_nc(paths,st='xy',single_graph=True))
+    fig=compare_nc(paths,st='xy',single_graph=True)
 
     # # それぞれの区画の開始300秒をプロット
     # for p in paths:
-    #     savefig(show_each_region(p))
+        # fig=show_each_region(p)
 
     # # 経過時間とファイルの行数の関係をプロット
     # for p in paths:
-    #     savefig(show_index())
+    #     fig=show_index()
 
     plt.show()
+    savefig(fig)
 
 ################################################################################
 

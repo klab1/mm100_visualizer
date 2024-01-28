@@ -3,3 +3,8 @@ data/
 mm100_visualizer
 mm100_visualizer.exe
 source/MyLib/__pycache__/
+cache/
+source/build/
+source/dist/
+img/
+*.spec

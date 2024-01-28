@@ -44,7 +44,7 @@ layout = [
         sg.Checkbox('z', key="show_index_region_z", default=True),
     ],
     [sg.Button('Confirm', key='confirm')],
-    [sg.Output(size=(80,2))]
+    [sg.Output(size=(80,4))]
 ]
 
 window = sg.Window('mm100 visualizer', layout,font=("Arial"))
