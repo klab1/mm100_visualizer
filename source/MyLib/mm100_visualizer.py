@@ -16,13 +16,14 @@ from matplotlib.figure import Figure
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
     paths=[
-        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
-        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
+        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
+        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
         '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C03.txt',
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AS100T00.txt',
     ]
 
     # # すべてのファイルを並べる
+    fig=compare_nc(paths,st='wxy')
     fig=compare_nc(paths)
 
     # xyをプロット
@@ -491,12 +492,20 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
         label = os.path.splitext(os.path.basename(file))[0]
         attrs,xyzw = desc(file,type='new',recalc=recalc, calcinter='w' not in st)
         show_attrs(attrs,xyzw[3],label)
-        ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=label)
+        maxh=3
+        if len(st)==2:
+            ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=f'{label} {st}')
+            maxh=max(xyzw[dic[st[1]]])
+        elif len(st)==3:
+            ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=f'{label} {st}')
+            ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[2]]], label=f'{label} {st}')
+            maxh=max(max(xyzw[dic[st[1]]]),max(xyzw[dic[st[2]]]))
         # ax.plot(w, z, label=label)
         ma=max(ma,xyzw[3][-1])
-        for at in attrs:
-            ax.scatter(xyzw[3][at],3,c='k',marker='x')
-            ax.text(xyzw[3][at],3,attrs[at][:6])
+        if 'w' in st:
+            for at in attrs:
+                ax.scatter(xyzw[3][at],maxh,c='k',marker='x')
+                ax.text(xyzw[3][at],maxh,attrs[at][:6])
     name=label if len(paths)==1 else f"{label}+{len(paths)-1}"
     print('name:',name)
     for ax in axs:

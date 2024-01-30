@@ -24,6 +24,7 @@ layout = [
         sg.Checkbox('wx', key="compare_nc_wx", default=False),
         sg.Checkbox('wy', key="compare_nc_wy", default=False),
         sg.Checkbox('wz', key="compare_nc_wz", default=True),
+        sg.Checkbox('wx+wy', key="compare_nc_wxy", default=False),
         sg.T('    ',),
         sg.Checkbox('single_graph',key='compare_nc_single_graph', default=True),
     ],
@@ -60,7 +61,7 @@ def g(event, values):
 
     if values['compare_nc']:
         print('compare_nc')
-        v=[v for v in ['xy','wx','wy','wz'] if values[f'compare_nc_{v}']]
+        v=[v for v in ['xy','wx','wy','wz','wxy'] if values[f'compare_nc_{v}']]
         for u in v:
             window.refresh()
             savefig(compare_nc(paths,st=u,single_graph=values['compare_nc_single_graph'],recalc=rc),dir=basepath+'imgs/')
