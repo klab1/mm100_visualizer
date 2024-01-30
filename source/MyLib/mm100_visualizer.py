@@ -324,10 +324,7 @@ def _trace1(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin:int
                     (ul[1]-pul[1])**2 +
                     (ul[2]-pul[2])**2
                 )**0.5
-                if l <= r:
-                    l *= 1.03
-                else:
-                    l = 2*r*np.arcsin(l/2/r)
+                l = 2*r*np.arcsin(l/2/r)
                 b.app(ul, l)
         elif ul.get_new('G')==49:
             print('\nsection ends with "G49"\n')
@@ -412,10 +409,7 @@ def load(strlist, calcinter):
                     b_append([lx, ly, z, ll/f*60])
             else:
                 l = np.linalg.norm((x-px, y-py, z-pz))
-                if l <= r:
-                    l *= 1.03
-                else:
-                    l = 2*r*np.arcsin(l/2/r)
+                l = 2*r*np.arcsin(l/2/r)
                 b_append([x, y, z, l/f*60])
 
     print()
