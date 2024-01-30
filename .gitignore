@@ -6,5 +6,6 @@ source/MyLib/__pycache__/
 cache/
 source/build/
 source/dist/
-img/
+imgs/
 *.spec
+source/pyinstaller main.py --onefile

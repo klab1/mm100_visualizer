@@ -16,25 +16,27 @@ from matplotlib.figure import Figure
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
     paths=[
-        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/新しいフォルダー/AD025E06.txt'
-        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/新しいフォルダー/AD025C07.txt'
+        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
+        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
+        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C03.txt',
+        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AS100T00.txt',
     ]
 
     # # すべてのファイルを並べる
-    # fig=compare_nc(paths,recalc=True)
+    fig=compare_nc(paths)
 
     # xyをプロット
-    fig=compare_nc(paths,st='xy',single_graph=True)
+    # fig=compare_nc(paths,st='xy',single_graph=True)
 
     # # それぞれの区画の開始300秒をプロット
     # for p in paths:
-        # fig=show_each_region(p)
+    #     fig=show_each_region(p)
 
     # # 経過時間とファイルの行数の関係をプロット
     # for p in paths:
     #     fig=show_index()
 
-    plt.show()
+    # plt.show()
     savefig(fig)
 
 ################################################################################
@@ -480,7 +482,7 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
     if not isinstance(paths,list):
         paths=[paths]
     h=int(single_graph or len(paths))
-    fig, axs = plt.subplots(h, 1, figsize=(14, h*1.5+1) if 'w' in st else (8,8))
+    fig, axs = plt.subplots(h, 1, figsize=(14, h*2+1) if 'w' in st else (8,8))
     if not hasattr(axs, "__iter__"):
         axs=[axs]*max(h,len(paths))
     dic={'x':0,'y':1,'z':2,'w':3}
@@ -492,6 +494,9 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
         ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=label)
         # ax.plot(w, z, label=label)
         ma=max(ma,xyzw[3][-1])
+        for at in attrs:
+            ax.scatter(xyzw[3][at],3,c='k',marker='x')
+            ax.text(xyzw[3][at],3,attrs[at][:6])
     name=label if len(paths)==1 else f"{label}+{len(paths)-1}"
     print('name:',name)
     for ax in axs:
@@ -519,12 +524,13 @@ def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=F
         return c
     cp=[0]+([w[v]-w[v]%f(width/5) for v in ats.keys()][:-1] if initial_region_point is None else initial_region_point)
     N=len(cp)
+    la=[label]+list(ats.values())
     fig, axs = plt.subplots(N, 1, figsize=(14, max(5,N*1.6)))
 
     axs[0].set_xticks(*make_ticks(w[-1]))
-    for i,(ax,p) in enumerate(zip(axs,cp)):
+    for i,(ax,p,l) in enumerate(zip(axs,cp,la)):
         if i==0:
-            ax.plot(w, z, label=label)
+            ax.plot(w, z, label=l)
         else:
             r=get_lim(p,p+width)
             try:
@@ -535,7 +541,7 @@ def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=F
                 e=np.argwhere(r[1]<w)[0,0]+1
             except:
                 e=len(w)
-            ax.plot(w[s:e], z[s:e], label=label)
+            ax.plot(w[s:e], z[s:e], label=l)
             ax.set_xlim(*r)
         ax.grid()
         ax.legend()
