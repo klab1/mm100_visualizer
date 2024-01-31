@@ -11,7 +11,7 @@ sg.theme('Default1')
 
 # ステップ3. ウィンドウの部品とレイアウト
 layout = [
-    [sg.T('ファイルを選択'), sg.Input(default_file, key='inputFilePath'), sg.FilesBrowse('ブラウズ')],
+    [sg.T('ファイルを選択'), sg.Input(default_file, key='inputFilePath',expand_x=True), sg.FilesBrowse('ブラウズ')],
     [
         sg.Checkbox('recalc',key='recalc', default=False),
         # sg.Checkbox('save',key='save', default=True),
@@ -44,11 +44,13 @@ layout = [
         sg.Checkbox('y', key="show_index_region_y", default=False),
         sg.Checkbox('z', key="show_index_region_z", default=True),
     ],
-    [sg.Button('Confirm', key='confirm')],
-    [sg.Output(size=(80,4))]
+    [sg.Button('Confirm', key='confirm'), sg.Push(), sg.T('ver. 1.2.3')],
+    [sg.Output(size=(999,999))]
 ]
 
-window = sg.Window('mm100 visualizer', layout,font=("Arial"))
+window = sg.Window('mm100 visualizer', layout,font=("Arial"), resizable=True, size=(600, 300),finalize=True)
+window.set_min_size((600,300))
+
 def f(*a,**b):
     # print(*a,**b)
     window.refresh()
