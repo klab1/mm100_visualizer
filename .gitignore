@@ -1,5 +1,4 @@
 .DS_Store
-data/
 mm100_visualizer
 mm100_visualizer.exe
 source/MyLib/__pycache__/

@@ -12,7 +12,7 @@
 
 1. ファイルを選択
 2. show_each_region だけを選択
-![Alt text](<data/スクリーンショット 2024-01-16 11.07.50.png>)
+![Alt text](<data/スクリーンショット 2024-02-01 10.43.19.png>)
 3. Confirm
 4. 下のボックスにdoneが出るまで待つ
 どこかの`imgs`フォルダーに画像が出力されます
@@ -35,20 +35,23 @@ compare_nc、xyだけにチェックを入れConfirmして掘る範囲が 0\~100
 
 - compare_nc
   - wz
-![Alt text](data/240116_103546.832064.png)
+![Alt text](data/240201_104703.889885.png)
 
   - xy
-![Alt text](data/231030_040705.441145.png)
+![Alt text](data/240201_104653.560343.png)
+
+  - wxy
+![Alt text](data/240201_104704.638398.png)
 
 - show_each_region
-![Alt text](data/231030_040705.983223.png)
+![Alt text](data/240201_104705.563297.png)
 
 - show_index
 上から時間に対するx,y,zのどれか、ミルの動くスピード、ncファイル上での行数（region (s)は 60秒程度がおすすめ）
   - region:空白, zのみ
-![Alt text](data/240123_185210.307593.png)
+![Alt text](data/240201_104707.824710.png)
   - region:0-60, zのみ
-![Alt text](data/240123_185416.670931.png)
+![Alt text](data/240201_104713.888910.png)
 
 ## 複数ファイル
 
@@ -59,19 +62,11 @@ show_each_region, show_indexは変わりません
 ![Alt text](<data/スクリーンショット 2024-01-16 10.42.41.png>)
 
 - compare_nc
-  - wz
-    - single_graph あり
-![Alt text](data/240116_104626.671238.png)
+  - wz, single_graph あり
+![Alt text](data/240201_105143.840541.png)
 
-    - single_graph なし
-![Alt text](data/240116_104322.049052.png)
-
-  - xy
-    - single_graph あり
-![Alt text](data/240116_104533.387003.png)
-
-    - single_graph なし
-![Alt text](data/240116_104502.794895.png)
+  - wz, single_graph なし
+![Alt text](data/240201_105153.893352.png)
 
 
 ## versions
@@ -79,6 +74,7 @@ show_each_region, show_indexは変わりません
 23/10/29 1.0
 24/1/24 1.1
 24/1/30 1.2.1
+24/1/31 1.2.3
 
 ## 動作確認
 
