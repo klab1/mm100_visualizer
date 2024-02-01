@@ -2,8 +2,9 @@ import os
 import time
 import PySimpleGUI as sg
 from MyLib.mm100_visualizer import compare_nc, desc, load_atc, savefig,show_each_region,show_index,change_printf,change_basepath
+import platform
 
-default_file=''
+default_file='a'
 basepath=''
 # basepath=os.path.dirname(__file__)+'/'
 # change_basepath(basepath)
@@ -48,16 +49,21 @@ layout = [
     [sg.Output(size=(999,999))]
 ]
 
-window = sg.Window('mm100 visualizer', layout,font=("Arial"), resizable=True, size=(600, 300),finalize=True)
-window.set_min_size((600,300))
+font=('Arial',12) if platform.system()=='Windows' else ('Arial')
+window = sg.Window('mm100 visualizer', layout,font=font, resizable=True, size=(700, 360),finalize=True)
+window.set_min_size((700,340))
 
 def f(*a,**b):
     # print(*a,**b)
     window.refresh()
     pass
 change_printf(f)
-    
+
 def g(event, values):
+    if not values['inputFilePath']:
+        print('select at least one file')
+        return
+
     paths=values['inputFilePath'].split(';')
     rc=values['recalc']
 
@@ -85,6 +91,13 @@ def g(event, values):
             savefig(show_index(p,region=t,st=v,recalc=rc,calcinter=True),dir=basepath+'imgs/')
         print('saved')
 
+print('a')
+time.sleep(1)
+window.write_event_value('init',1)
+window.refresh()
+g(*window.read())
+window.refresh()
+
 while True:
     event, values = window.read()
     try:
@@ -92,9 +105,6 @@ while True:
             case sg.WIN_CLOSED: #ウィンドウのXボタンを押したときの処理:
                 break
             case 'confirm':
-                if not values['inputFilePath']:
-                    print('select at least one file')
-                    continue
                 g(event, values)
             case _:
                 raise ValueError(f'no event defined: {event}')
