@@ -18,12 +18,12 @@ def main():
     paths=[
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
-        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C03.txt',
+        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C04.txt',
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AS100T00.txt',
     ]
 
     # # すべてのファイルを並べる
-    fig=compare_nc(paths,st='wxy')
+    # fig=compare_nc(paths,st='wxy')
     fig=compare_nc(paths)
 
     # xyをプロット
@@ -473,7 +473,7 @@ def make_ticks(lastw,min=15):
 
 ###########################################
 
-def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
+def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False,millname=None,line_width=3):
     if not isinstance(paths,list):
         paths=[paths]
     h=int(single_graph or len(paths))
@@ -481,6 +481,7 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
     if not hasattr(axs, "__iter__"):
         axs=[axs]*max(h,len(paths))
     dic={'x':0,'y':1,'z':2,'w':3}
+    millname=millname or ['']*4
     ma=0
     for ax,file in zip(axs,paths):
         label = os.path.splitext(os.path.basename(file))[0]
@@ -499,7 +500,11 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
         if 'w' in st:
             for at in attrs:
                 ax.scatter(xyzw[3][at],maxh,c='k',marker='x')
-                ax.text(xyzw[3][at],maxh,attrs[at][:6])
+                try:
+                    add=f' {millname[int(attrs[at][5])-1]}'
+                except:
+                    add=''
+                ax.text(xyzw[3][at],maxh,attrs[at][:6]+add)
     name=label if len(paths)==1 else f"{label}+{len(paths)-1}"
     print('name:',name)
     for ax in axs:
@@ -513,7 +518,7 @@ def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False):
     fig.tight_layout()
     return fig
 
-def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=False):
+def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=False,millname=None):
     label=os.path.splitext(os.path.basename(path))[0]
     ats,(_,_,z,w) = desc(path,calcinter=False,type='new',recalc=recalc)
     show_attrs(ats,w,label)
@@ -527,7 +532,14 @@ def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=F
         return c
     cp=[0]+([w[v]-w[v]%f(width/5) for v in ats.keys()][:-1] if initial_region_point is None else initial_region_point)
     N=len(cp)
-    la=[label]+list(ats.values())
+    millname=millname or ['']*4
+    la=[label]
+    for l in list(ats.values()):
+        try:
+            add=f' {millname[int(l[5])-1]}'
+        except:
+            add=''
+        la.append(l[:6]+add)
     fig, axs = plt.subplots(N, 1, figsize=(14, max(5,N*1.6)))
 
     axs[0].set_xticks(*make_ticks(w[-1]))
@@ -568,7 +580,7 @@ def show_xy(paths:List[str],xy='xy'):
     fig.tight_layout()
     return fig
 
-def show_index(path:str,region:Tuple[float,float]=None,st='z',recalc=False,calcinter=False):
+def show_index(path:str,region:Tuple[float,float]=None,st='z',recalc=False,calcinter=False,millname=None):
     fig, axs = plt.subplots(3, 1,figsize=(14,8))
     ats,(x, y, z, w) = desc(path,recalc=recalc,calcinter=calcinter)
     x,y,z=np.array(x),np.array(y),np.array(z)
@@ -576,6 +588,7 @@ def show_index(path:str,region:Tuple[float,float]=None,st='z',recalc=False,calci
     k=10/ind.max()
     k=(ind*k).astype(int)/k
     label=os.path.splitext(os.path.basename(path))[0]
+    millname=millname or ['']*4
     show_attrs(ats,w,label)
     if region is not None:
         w=np.array(w)
