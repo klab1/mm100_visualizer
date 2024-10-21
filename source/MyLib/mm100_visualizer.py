@@ -5,7 +5,7 @@ import os
 import pickle
 from math import log10
 from pprint import pprint
-from typing import List,Tuple
+from typing import List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -15,7 +15,7 @@ from matplotlib.figure import Figure
 
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
-    paths=[
+    paths = [
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
         # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
         '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C04.txt',
@@ -24,7 +24,7 @@ def main():
 
     # # すべてのファイルを並べる
     # fig=compare_nc(paths,st='wxy')
-    fig=compare_nc(paths)
+    fig = compare_nc(paths)
 
     # xyをプロット
     # fig=compare_nc(paths,st='xy',single_graph=True)
@@ -42,13 +42,19 @@ def main():
 
 ################################################################################
 
+
 def change_printf(func):
     global print
-    print=func
-basepath=''
+    print = func
+
+
+basepath = ''
+
+
 def change_basepath(path):
     global basepath
-    basepath=path
+    basepath = path
+
 
 def convert_sec(s):
     if s < 60:
@@ -58,8 +64,10 @@ def convert_sec(s):
     else:
         return f'{s//3600:.0f}h {s//60%60:.0f}m {s%60:.1f}s'
 
+
 def get_lim(s, e, margin=0.05):
     return s-(e-s)*margin, e+(e-s)*margin
+
 
 class CommandparsedList(list):
     command_list_fl = 'XYZFIJR'
@@ -69,16 +77,16 @@ class CommandparsedList(list):
 
     def __init__(self, arr=None):
         self.reset()
-        self.history=collections.deque(maxlen=10)
+        self.history = collections.deque(maxlen=10)
         super().__init__(arr or [0]*len(self.command_list))
 
     def reset(self):
         self.updated = [0]*len(self.command_list)
 
     def get_new(self, letter: str):
-        k=self.command_dict[letter]
+        k = self.command_dict[letter]
         return self[k] if self.updated[k] else None
-    
+
     def get(self, letter: str):
         return self[self.command_dict[letter]]
 
@@ -88,11 +96,11 @@ class CommandparsedList(list):
         return value
 
     def copy(self):
-        ul=CommandparsedList(super().copy())
+        ul = CommandparsedList(super().copy())
         # ul.history=self.history
         return ul
 
-    def command_parse(self,s:str):
+    def command_parse(self, s: str):
         os = s
         self.history.append(s)
         i = 0
@@ -131,11 +139,12 @@ class MillPosition(list):
     def app(self, ul: CommandparsedList, length: float):
         self.append([ul.get('X'), ul.get('Y'), ul.get('Z'), length/ul.get('F')*60])
         return self
+
     def app_safe(self, ul: CommandparsedList, length: float):
-        if ul.get('F')==0:
-            self.append([ul.get('X'), ul.get('Y'), ul.get('Z'),0])
+        if ul.get('F') == 0:
+            self.append([ul.get('X'), ul.get('Y'), ul.get('Z'), 0])
         else:
-            self.app(ul,length)
+            self.app(ul, length)
         return self
 
 
@@ -245,7 +254,7 @@ def _skip_to_g45(strlist, inin):
     return n+1+inin
 
 
-def see_definition(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin:int):
+def see_definition(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin: int):
     tmwidth = shutil.get_terminal_size().columns
     alllen = len(strlist)
     for n, s in enumerate(strlist[inin:]):
@@ -255,29 +264,29 @@ def see_definition(strlist: List[str], b: MillPosition, ul: CommandparsedList, i
         pul = ul.copy()
         ul.command_parse(s)
 
-        if ul.get_new('M')==8:# 切削に入る
+        if ul.get_new('M') == 8:  # 切削に入る
             l = (
                 (ul[0]-pul[0])**2 +
                 (ul[1]-pul[1])**2 +
                 (ul[2]-pul[2])**2
             )**0.5
             b.app_safe(ul, l)
-            ul.set('G',1)
-            ps=f'Mill:{ul.get("T")}, Speed:{ul.get("S")}'
-            b[0][len(b)-2]=ps
+            ul.set('G', 1)
+            ps = f'Mill:{ul.get("T")}, Speed:{ul.get("S")}'
+            b[0][len(b)-2] = ps
             print('\n'+ps)
             print('definition ends with "M08"')
             return n+1+inin, b, ul
-        elif ul.get_new('M')==30:# ファイルの終わり
-            ps=f'File end'
-            b[0][len(b)-2]=ps
+        elif ul.get_new('M') == 30:  # ファイルの終わり
+            ps = f'File end'
+            b[0][len(b)-2] = ps
             print('\ndefinition ends with "M30"')
             return -1, b, ul
         # elif ul.get_new('M') in [3,6]:# 見たいだけ
         #     print(s+' '*10)
 
 
-def _trace1(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin:int, calcinter: bool):
+def _trace1(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin: int, calcinter: bool):
     tmwidth = shutil.get_terminal_size().columns
     cinter = GetIntermidiateNew() if calcinter else None
     alllen = len(strlist)
@@ -288,10 +297,10 @@ def _trace1(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin:int
         pul = ul.copy()
         ul.command_parse(s)
 
-        if ul.get_new('M')==8:
+        if ul.get_new('M') == 8:
             print('\nsection ends with "M08"\n')
             return n+inin, b, ul
-        elif ul.get('G') == 0 or n==0:
+        elif ul.get('G') == 0 or n == 0:
             l = (
                 (ul[0]-pul[0])**2 +
                 (ul[1]-pul[1])**2 +
@@ -326,7 +335,7 @@ def _trace1(strlist: List[str], b: MillPosition, ul: CommandparsedList, inin:int
                 )**0.5
                 l = 2*r*np.arcsin(l/2/r)
                 b.app(ul, l)
-        elif ul.get_new('G')==49:
+        elif ul.get_new('G') == 49:
             print('\nsection ends with "G49"\n')
             return n+1+inin, b, ul
         else:
@@ -422,7 +431,8 @@ def load_atc(strlist: List[str], calcinter: bool):
     i = _skip_to_g45(strlist, 0)
     while True:
         i, b, ul = see_definition(strlist, b, ul, i)
-        if i==-1:break
+        if i == -1:
+            break
         i, b, ul = _trace1(strlist, b, ul, i, calcinter)
 
     # i, ul = _initial_pos(strlist, ul, i)
@@ -457,105 +467,108 @@ def desc(path, till=None, calcinter=False, type='new', recalc=False):
     return attrs, data
 
 
-def show_attrs(attrs,w,name=''):
-    a=[f'{convert_sec(w[k])} : {v}' for k,v in attrs.items()]
+def show_attrs(attrs, w, name=''):
+    a = [f'{convert_sec(w[k])} : {v}' for k, v in attrs.items()]
     print(f'Attrs : {name}')
     pprint(a)
     print()
 
-def make_ticks(lastw,min=15):
-    rmin=int(min*60)
-    tile=[f'.{min*i}' for i in range(60//min)]
-    tile[0]=''
-    xt=np.arange(0,((lastw//rmin)+2)*rmin,rmin)
-    tile=np.tile(tile,len(xt)//len(tile)+1)
-    return xt,map(lambda x:f'{int(x[0]/3600)}{x[1]}',zip(xt,tile))
+
+def make_ticks(lastw, min=15):
+    rmin = int(min*60)
+    tile = [f'.{min*i}' for i in range(60//min)]
+    tile[0] = ''
+    xt = np.arange(0, ((lastw//rmin)+2)*rmin, rmin)
+    tile = np.tile(tile, len(xt)//len(tile)+1)
+    return xt, map(lambda x: f'{int(x[0]/3600)}{x[1]}', zip(xt, tile))
 
 ###########################################
 
-def compare_nc(paths:str|List[str],st='wz',single_graph=False,recalc=False,millname=None,line_width=3):
-    if not isinstance(paths,list):
-        paths=[paths]
-    h=int(single_graph or len(paths))
-    fig, axs = plt.subplots(h, 1, figsize=(14, h*2+1) if 'w' in st else (8,8))
+
+def compare_nc(paths: str | List[str], st='wz', single_graph=False, recalc=False, millname=None, line_width=3):
+    if not isinstance(paths, list):
+        paths = [paths]
+    h = int(single_graph or len(paths))
+    fig, axs = plt.subplots(h, 1, figsize=(14, h*2+1) if 'w' in st else (8, 8))
     if not hasattr(axs, "__iter__"):
-        axs=[axs]*max(h,len(paths))
-    dic={'x':0,'y':1,'z':2,'w':3}
-    millname=millname or ['']*4
-    ma=0
-    for ax,file in zip(axs,paths):
+        axs = [axs]*max(h, len(paths))
+    dic = {'x': 0, 'y': 1, 'z': 2, 'w': 3}
+    millname = millname or ['']*4
+    ma = 0
+    for ax, file in zip(axs, paths):
         label = os.path.splitext(os.path.basename(file))[0]
-        attrs,xyzw = desc(file,type='new',recalc=recalc, calcinter='w' not in st)
-        show_attrs(attrs,xyzw[3],label)
-        maxh=3
-        if len(st)==2:
+        attrs, xyzw = desc(file, type='new', recalc=recalc, calcinter='w' not in st)
+        show_attrs(attrs, xyzw[3], label)
+        maxh = 3
+        if len(st) == 2:
             ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=f'{label} {st}')
-            maxh=max(xyzw[dic[st[1]]])
-        elif len(st)==3:
+            maxh = max(xyzw[dic[st[1]]])
+        elif len(st) == 3:
             ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[1]]], label=f'{label} {st}')
             ax.plot(xyzw[dic[st[0]]], xyzw[dic[st[2]]], label=f'{label} {st}')
-            maxh=max(max(xyzw[dic[st[1]]]),max(xyzw[dic[st[2]]]))
+            maxh = max(max(xyzw[dic[st[1]]]), max(xyzw[dic[st[2]]]))
         # ax.plot(w, z, label=label)
-        ma=max(ma,xyzw[3][-1])
+        ma = max(ma, xyzw[3][-1])
         if 'w' in st:
             for at in attrs:
-                ax.scatter(xyzw[3][at],maxh,c='k',marker='x')
+                ax.scatter(xyzw[3][at], maxh, c='k', marker='x')
                 try:
-                    add=f' {millname[int(attrs[at][5])-1]}'
+                    add = f' {millname[int(attrs[at][5])-1]}'
                 except:
-                    add=''
-                ax.text(xyzw[3][at],maxh,attrs[at][:6]+add)
-    name=label if len(paths)==1 else f"{label}+{len(paths)-1}"
-    print('name:',name)
+                    add = ''
+                ax.text(xyzw[3][at], maxh, attrs[at][:6]+add)
+    name = label if len(paths) == 1 else f"{label}+{len(paths)-1}"
+    print('name:', name)
     for ax in axs:
         if not 'w' in st:
             ax.set_aspect('equal')
         else:
             ax.set_xticks(*make_ticks(ma))
-            ax.set_xlim(*get_lim(0,ma))
+            ax.set_xlim(*get_lim(0, ma))
         ax.grid()
         ax.legend()
     fig.tight_layout()
     return fig
 
-def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=False,millname=None):
-    label=os.path.splitext(os.path.basename(path))[0]
-    ats,(_,_,z,w) = desc(path,calcinter=False,type='new',recalc=recalc)
-    show_attrs(ats,w,label)
-    name='region_'+label
-    print('name:',name)
+
+def show_each_region(path, initial_region_point: List[int] = None, width=300, recalc=False, millname=None):
+    label = os.path.splitext(os.path.basename(path))[0]
+    ats, (_, _, z, w) = desc(path, calcinter=False, type='new', recalc=recalc)
+    show_attrs(ats, w, label)
+    name = 'region_'+label
+    print('name:', name)
 
     def f(a):
-        c=b=10**int(log10(a))
-        if a/b>=5:
-            c=5*b
+        c = b = 10**int(log10(a))
+        if a/b >= 5:
+            c = 5*b
         return c
-    cp=[0]+([w[v]-w[v]%f(width/5) for v in ats.keys()][:-1] if initial_region_point is None else initial_region_point)
-    N=len(cp)
-    millname=millname or ['']*4
-    la=[label]
+    cp = [0]+([w[v]-w[v] % f(width/5) for v in ats.keys()][:-1] if initial_region_point is None else initial_region_point)
+    N = len(cp)
+    millname = millname or ['']*4
+    la = [label]
     for l in list(ats.values()):
         try:
-            add=f' {millname[int(l[5])-1]}'
+            add = f' {millname[int(l[5])-1]}'
         except:
-            add=''
+            add = ''
         la.append(l[:6]+add)
-    fig, axs = plt.subplots(N, 1, figsize=(14, max(5,N*1.6)))
+    fig, axs = plt.subplots(N, 1, figsize=(14, max(5, N*1.6)))
 
     axs[0].set_xticks(*make_ticks(w[-1]))
-    for i,(ax,p,l) in enumerate(zip(axs,cp,la)):
-        if i==0:
+    for i, (ax, p, l) in enumerate(zip(axs, cp, la)):
+        if i == 0:
             ax.plot(w, z, label=l)
         else:
-            r=get_lim(p,p+width)
+            r = get_lim(p, p+width)
             try:
-                s=np.argwhere(r[0]<w)[0,0]
+                s = np.argwhere(r[0] < w)[0, 0]
             except:
-                e=len(w)
+                e = len(w)
             try:
-                e=np.argwhere(r[1]<w)[0,0]+1
+                e = np.argwhere(r[1] < w)[0, 0]+1
             except:
-                e=len(w)
+                e = len(w)
             ax.plot(w[s:e], z[s:e], label=l)
             ax.set_xlim(*r)
         ax.grid()
@@ -563,78 +576,81 @@ def show_each_region(path,initial_region_point:List[int]=None,width=300,recalc=F
     fig.tight_layout()
     return fig
 
-def show_xy(paths:List[str],xy='xy'):
-    fig, axs = plt.subplots(1, 1,figsize=(8,8))
-    dic={'x':0,'y':1,'z':2,'w':3}
+
+def show_xy(paths: List[str], xy='xy'):
+    fig, axs = plt.subplots(1, 1, figsize=(8, 8))
+    dic = {'x': 0, 'y': 1, 'z': 2, 'w': 3}
     if not 'w' in xy:
         axs.set_aspect('equal')
     for file in paths:
-        label=os.path.splitext(os.path.basename(file))[0]
-        ats,xyzw = desc(file, calcinter=True,type='new')
-        show_attrs(ats,xyzw[3],label)
+        label = os.path.splitext(os.path.basename(file))[0]
+        ats, xyzw = desc(file, calcinter=True, type='new')
+        show_attrs(ats, xyzw[3], label)
         axs.plot(xyzw[dic[xy[0]]], xyzw[dic[xy[1]]], label=label)
-    name=f'{xy}_'+(label if len(paths)==1 else f"{label}+{len(paths)-1}")
-    print('name:',name)
+    name = f'{xy}_'+(label if len(paths) == 1 else f"{label}+{len(paths)-1}")
+    print('name:', name)
     axs.grid()
     axs.legend()
     fig.tight_layout()
     return fig
 
-def show_index(path:str,region:Tuple[float,float]=None,st='z',recalc=False,calcinter=False,millname=None):
-    fig, axs = plt.subplots(3, 1,figsize=(14,8))
-    ats,(x, y, z, w) = desc(path,recalc=recalc,calcinter=calcinter)
-    x,y,z=np.array(x),np.array(y),np.array(z)
-    ind=np.array(range(len(w)))
-    k=10/ind.max()
-    k=(ind*k).astype(int)/k
-    label=os.path.splitext(os.path.basename(path))[0]
-    millname=millname or ['']*4
-    show_attrs(ats,w,label)
+
+def show_index(path: str, region: Tuple[float, float] = None, st='z', recalc=False, calcinter=False, millname=None):
+    fig, axs = plt.subplots(3, 1, figsize=(14, 8))
+    ats, (x, y, z, w) = desc(path, recalc=recalc, calcinter=calcinter)
+    x, y, z = np.array(x), np.array(y), np.array(z)
+    ind = np.array(range(len(w)))
+    k = 10/ind.max()
+    k = (ind*k).astype(int)/k
+    label = os.path.splitext(os.path.basename(path))[0]
+    millname = millname or ['']*4
+    show_attrs(ats, w, label)
     if region is not None:
-        w=np.array(w)
-        s=np.argwhere(region[0]<w)[0,0]-1
-        e=np.argwhere(region[1]<w)[0,0]+1
-        x=x[s:e]
-        y=y[s:e]
-        z=z[s:e]
-        w=w[s:e]
-        ind=ind[s:e]
-        k=k[s:e]
-        axs[2].set_ylim(get_lim(min(ind),max(ind)))
+        w = np.array(w)
+        s = np.argwhere(region[0] < w)[0, 0]-1
+        e = np.argwhere(region[1] < w)[0, 0]+1
+        x = x[s:e]
+        y = y[s:e]
+        z = z[s:e]
+        w = w[s:e]
+        ind = ind[s:e]
+        k = k[s:e]
+        axs[2].set_ylim(get_lim(min(ind), max(ind)))
         # axs[0].set_ylim(get_lim(-1.5,-0.5))
-    
-    for v,arr in zip('xyz',[x,y,z]):
+
+    for v, arr in zip('xyz', [x, y, z]):
         if not v in st:
             continue
         if region is not None:
-            if e-s<1000:
+            if e-s < 1000:
                 for i in range(e-s-1):
-                    axs[0].plot(w[i:i+2],arr[i:i+2])
+                    axs[0].plot(w[i:i+2], arr[i:i+2])
             else:
-                axs[0].plot(w,arr)
+                axs[0].plot(w, arr)
         else:
-            axs[0].plot(w,arr,label=label)
-        
-    sp=(x[1:]-x[:-1])**2+(y[1:]-y[:-1])**2+(z[1:]-z[:-1])**2
-    sp=sp**0.5/(w[1:]-w[:-1])*60
-    sp=np.array([sp,sp]).T.flatten()
-    sw=np.array([w,w]).T.flatten()[1:-1]
-    axs[1].plot(sw,sp,label='sp')
-    
-    axs[2].plot(w,ind,label='index')
-    axs[2].plot(w,k,label='step10')
+            axs[0].plot(w, arr, label=label)
+
+    sp = (x[1:]-x[:-1])**2+(y[1:]-y[:-1])**2+(z[1:]-z[:-1])**2
+    sp = sp**0.5/(w[1:]-w[:-1])*60
+    sp = np.array([sp, sp]).T.flatten()
+    sw = np.array([w, w]).T.flatten()[1:-1]
+    axs[1].plot(sw, sp, label='sp')
+
+    axs[2].plot(w, ind, label='index')
+    axs[2].plot(w, k, label='step10')
     for ax in axs:
         if region is None:
             # ax.set_xlim(*region)
             ax.set_xticks(*make_ticks(w[-1]))
         ax.grid()
         ax.legend()
-    name='index_'+label
-    print('name:',name)
+    name = 'index_'+label
+    print('name:', name)
     fig.tight_layout()
     return fig
 
-def savefig(fig: Figure, dir='imgs/',format='%y%m%d_%H%M%S.%f.png', dpi=150, tight_layout=True):
+
+def savefig(fig: Figure, dir='imgs/', format='%y%m%d_%H%M%S.%f.png', dpi=150, tight_layout=True):
     name = datetime.datetime.now().strftime(dir+format)
     if not os.path.exists(os.path.dirname(name)):
         os.makedirs(os.path.dirname(name), exist_ok=True)
@@ -642,6 +658,7 @@ def savefig(fig: Figure, dir='imgs/',format='%y%m%d_%H%M%S.%f.png', dpi=150, tig
         fig.tight_layout()
     fig.savefig(name, dpi=dpi)
     return fig
+
 
 if __name__ == '__main__':
     main()
