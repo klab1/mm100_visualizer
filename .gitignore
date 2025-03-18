@@ -8,3 +8,4 @@ source/dist/
 imgs/
 *.spec
 source/pyinstaller main.py --onefile
+source/__pycache__/

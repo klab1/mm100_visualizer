@@ -1,10 +1,11 @@
 import json
 import os
-import pathlib
-import time
-import PySimpleGUI as sg
-from MyLib.mm100_visualizer import compare_nc, desc, load_atc, savefig, show_each_region, show_index, change_printf, change_basepath
 import platform
+
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
+
+from mm100_visualizer import change_printf, compare_nc, savefig, show_each_region, show_index
 
 basepath = ''
 # basepath=os.path.dirname(__file__)+'/'
@@ -34,6 +35,8 @@ def h(values=None, reset=False):
     path = basepath+'cache/param'
     if reset or not os.path.exists(path):
         d = {k: de for k, de in zip(keys, default)}
+        if not os.path.exists(basepath+'cache/'):
+            os.makedirs(basepath+'cache/', exist_ok=True)
         with open(path, 'w', encoding='utf-8') as fp:
             json.dump(d, fp)
     if values is not None:
@@ -71,10 +74,10 @@ layout = [
     [
         sg.T('  ',),
         sg.Checkbox('xy', key="compare_nc_xy", default=False),
-        sg.Checkbox('wx', key="compare_nc_wx", default=False),
-        sg.Checkbox('wy', key="compare_nc_wy", default=False),
-        sg.Checkbox('wz', key="compare_nc_wz", default=True),
-        sg.Checkbox('wx+wy', key="compare_nc_wxy", default=False),
+        sg.Checkbox('x', key="compare_nc_wx", default=False),
+        sg.Checkbox('y', key="compare_nc_wy", default=False),
+        sg.Checkbox('z', key="compare_nc_wz", default=True),
+        sg.Checkbox('x+y', key="compare_nc_wxy", default=False),
         sg.T('    ',),
         sg.Checkbox('single_graph', key='compare_nc_single_graph', default=True),
         sg.Push(),
@@ -106,7 +109,7 @@ layout = [
         sg.Button('Confirm', key='confirm'),
         sg.Push(),
         sg.Button('Reset', key='reset'),
-        sg.T('ver. 1.3.1')
+        sg.T('ver. 2.1.1')
     ],
     [sg.Output(size=(999, 999))]
 ]
@@ -139,15 +142,15 @@ def g(event, values):
         v = [v for v in ['xy', 'wx', 'wy', 'wz', 'wxy'] if values[f'compare_nc_{v}']]
         for u in v:
             window.refresh()
-            savefig(compare_nc(paths, st=u, single_graph=values['compare_nc_single_graph'], recalc=rc, millname=millname), dir=basepath+'imgs/')
-        print('saved')
+            path = savefig(compare_nc(paths, st=u, single_graph=values['compare_nc_single_graph'], recalc=rc, millname=millname), dir=basepath+'imgs/')
+        print('Saved at', path.absolute())
 
     if values['show_each_region']:
         print('show_each_region')
         for p in paths:
             window.refresh()
-            savefig(show_each_region(p, width=int(values['show_each_region_width']), recalc=rc, millname=millname), dir=basepath+'imgs/')
-        print('saved')
+            path = savefig(show_each_region(p, width=int(values['show_each_region_width']), recalc=rc, millname=millname), dir=basepath+'imgs/')
+        print('Saved at', path.absolute())
 
     if values['show_index']:
         print('show_index')
@@ -155,8 +158,8 @@ def g(event, values):
             window.refresh()
             t = tuple(map(float, values['show_index_region'].split('-'))) if values['show_index_region'] else None
             v = ''.join([v for v in 'xyz' if values[f'show_index_region_{v}']])
-            savefig(show_index(p, region=t, st=v, recalc=rc, calcinter=True, millname=millname), dir=basepath+'imgs/')
-        print('saved')
+            path = savefig(show_index(p, region=t, st=v, recalc=rc, calcinter=True, millname=millname), dir=basepath+'imgs/')
+        print('Saved at', path.absolute())
 
 # print('a')
 # time.sleep(1)

@@ -1,44 +1,38 @@
 import collections
-import shutil
 import datetime
 import os
 import pickle
+import shutil
+import pathlib
 from math import log10
 from pprint import pprint
 from typing import List, Tuple
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 
-# from MyLib.util import convert_sec,get_lim
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.figure import Figure
 
 
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
-    paths = [
-        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025E06.txt',
-        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD025C07.txt',
-        '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AD041C04.txt',
-        # '/Users/klab_mac1/Library/CloudStorage/GoogleDrive-s208486s@st.go.tuat.ac.jp/共有ドライブ/Klab/個人フォルダ/Emura/共有/mm100/AS100T00.txt',
-    ]
+    paths = r'/Users/klab_mac1/Downloads/USB_name.txt'
 
-    # # すべてのファイルを並べる
-    # fig=compare_nc(paths,st='wxy')
-    fig = compare_nc(paths)
+    dir = os.path.join(os.path.dirname(paths), 'imgs')
+    name = os.path.splitext(os.path.basename(paths))[0]
+
+    # すべてのファイルを並べる
+    savefig(compare_nc([paths]), dir=dir, format=name+'_1.png')
 
     # xyをプロット
-    # fig=compare_nc(paths,st='xy',single_graph=True)
+    savefig(compare_nc([paths], st='xy', single_graph=True), dir=dir, format=name+'_2.png')
 
-    # # それぞれの区画の開始300秒をプロット
-    # for p in paths:
-    #     fig=show_each_region(p)
+    # それぞれの区画の開始300秒をプロット
+    savefig(show_each_region(paths), dir=dir, format=name+'_3.png')
 
-    # # 経過時間とファイルの行数の関係をプロット
-    # for p in paths:
-    #     fig=show_index()
+    # 経過時間とファイルの行数の関係をプロット
+    # savefig(show_index(paths), format=name+'_4.png')
 
-    # plt.show()
-    savefig(fig)
+    plt.show()
 
 ################################################################################
 
@@ -651,13 +645,14 @@ def show_index(path: str, region: Tuple[float, float] = None, st='z', recalc=Fal
 
 
 def savefig(fig: Figure, dir='imgs/', format='%y%m%d_%H%M%S.%f.png', dpi=150, tight_layout=True):
-    name = datetime.datetime.now().strftime(dir+format)
-    if not os.path.exists(os.path.dirname(name)):
-        os.makedirs(os.path.dirname(name), exist_ok=True)
+    path = datetime.datetime.now().strftime(os.path.join(dir, format))
+    path = pathlib.Path(path)
+    if not path.parent.exists():
+        path.parent.mkdir(exist_ok=True, parents=True)
     if tight_layout:
         fig.tight_layout()
-    fig.savefig(name, dpi=dpi)
-    return fig
+    fig.savefig(path, dpi=dpi)
+    return path
 
 
 if __name__ == '__main__':
