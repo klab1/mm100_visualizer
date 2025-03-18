@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import traceback
 
 # import PySimpleGUI as sg
 import FreeSimpleGUI as sg
@@ -109,7 +110,7 @@ layout = [
         sg.Button('Confirm', key='confirm'),
         sg.Push(),
         sg.Button('Reset', key='reset'),
-        sg.T('ver. 2.1.1')
+        sg.T('ver. 2.1.2')
     ],
     [sg.Output(size=(999, 999))]
 ]
@@ -138,7 +139,7 @@ def g(event, values):
     millname = [values[f'mill_name_{i+1}'] for i in range(4)]
 
     if values['compare_nc']:
-        print('compare_nc')
+        print('Running compare_nc...')
         v = [v for v in ['xy', 'wx', 'wy', 'wz', 'wxy'] if values[f'compare_nc_{v}']]
         for u in v:
             window.refresh()
@@ -146,14 +147,14 @@ def g(event, values):
         print('Saved at', path.absolute())
 
     if values['show_each_region']:
-        print('show_each_region')
+        print('Running show_each_region...')
         for p in paths:
             window.refresh()
             path = savefig(show_each_region(p, width=int(values['show_each_region_width']), recalc=rc, millname=millname), dir=basepath+'imgs/')
         print('Saved at', path.absolute())
 
     if values['show_index']:
-        print('show_index')
+        print('Running show_index...')
         for p in paths:
             window.refresh()
             t = tuple(map(float, values['show_index_region'].split('-'))) if values['show_index_region'] else None
@@ -188,6 +189,6 @@ while True:
             raise ValueError(f'no event defined: {event}')
 
     except Exception as e:
-        print(e)
+        traceback.print_exc()
 
 window.close()
