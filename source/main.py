@@ -110,7 +110,7 @@ layout = [
         sg.Button('Confirm', key='confirm'),
         sg.Push(),
         sg.Button('Reset', key='reset'),
-        sg.T('ver. 2.1.2')
+        sg.T('ver. 2.1.3')
     ],
     [sg.Output(size=(999, 999))]
 ]
