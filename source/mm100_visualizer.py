@@ -1,21 +1,23 @@
 import collections
 import datetime
 import os
+import pathlib
 import pickle
 import shutil
-import pathlib
 from math import log10
 from pprint import pprint
 from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.ticker import AutoMinorLocator, FuncFormatter, MultipleLocator
 
 
 def main():
     # ファイルのパス　txtでもncでも可　先頭にrをつける(windows)
-    paths = r'/Users/klab_mac1/Downloads/USB_name.txt'
+    paths = r'/Users/klab_mac1/python/data/a.txt'
 
     dir = os.path.join(os.path.dirname(paths), 'imgs')
     name = os.path.splitext(os.path.basename(paths))[0]
@@ -23,11 +25,11 @@ def main():
     # すべてのファイルを並べる
     savefig(compare_nc([paths]), dir=dir, format=name+'_1.png')
 
-    # xyをプロット
-    savefig(compare_nc([paths], st='xy', single_graph=True), dir=dir, format=name+'_2.png')
+    # # xyをプロット
+    # savefig(compare_nc([paths], st='xy', single_graph=True), dir=dir, format=name+'_2.png')
 
-    # それぞれの区画の開始300秒をプロット
-    savefig(show_each_region(paths), dir=dir, format=name+'_3.png')
+    # # それぞれの区画の開始300秒をプロット
+    # savefig(show_each_region(paths), dir=dir, format=name+'_3.png')
 
     # 経過時間とファイルの行数の関係をプロット
     # savefig(show_index(paths), format=name+'_4.png')
@@ -468,13 +470,25 @@ def show_attrs(attrs, w, name=''):
     print()
 
 
-def make_ticks(lastw, min=15):
-    rmin = int(min*60)
-    tile = [f'.{min*i}' for i in range(60//min)]
-    tile[0] = ''
-    xt = np.arange(0, ((lastw//rmin)+2)*rmin, rmin)
-    tile = np.tile(tile, len(xt)//len(tile)+1)
-    return xt, map(lambda x: f'{int(x[0]/3600)}{x[1]}', zip(xt, tile))
+def make_ticks(ax: Axes, last_sec):
+    def seconds_to_time(x, pos):
+        if x >= 3600:
+            return f"{int(x/3600)}h"+(seconds_to_time(x % 3600, None) if x % 3600 else '')
+        elif x >= 60:
+            return f"{int(x/60)}m"+(seconds_to_time(x % 60, None) if x % 60 else '')
+        elif x > 0:
+            return f"{int(x)}s"
+        else:
+            return '0'
+
+    bound = [10, 30, 60, 300, 600, 900, 1200, 1800, 3600]
+    mtick = [1, 2, 2, 5, 2, 3, 2, 3, 2]
+    for i in range(len(bound)):
+        if last_sec/bound[i] < 10:
+            break
+    ax.xaxis.set_major_locator(MultipleLocator(bound[i]))
+    ax.xaxis.set_minor_locator(AutoMinorLocator(mtick[i]))
+    ax.xaxis.set_major_formatter(FuncFormatter(seconds_to_time))  # 軸ラベルを変換
 
 ###########################################
 
@@ -485,7 +499,7 @@ def compare_nc(paths: str | List[str], st='wz', single_graph=False, recalc=False
     h = int(single_graph or len(paths))
     fig, axs = plt.subplots(h, 1, figsize=(14, h*2+1) if 'w' in st else (8, 8))
     if not hasattr(axs, "__iter__"):
-        axs = [axs]*max(h, len(paths))
+        axs: List[Axes] = [axs]*max(h, len(paths))
     dic = {'x': 0, 'y': 1, 'z': 2, 'w': 3}
     millname = millname or ['']*4
     ma = 0
@@ -517,7 +531,7 @@ def compare_nc(paths: str | List[str], st='wz', single_graph=False, recalc=False
         if not 'w' in st:
             ax.set_aspect('equal')
         else:
-            ax.set_xticks(*make_ticks(ma))
+            make_ticks(ax, ma)
             ax.set_xlim(*get_lim(0, ma))
         ax.grid()
         ax.legend()
@@ -549,7 +563,7 @@ def show_each_region(path, initial_region_point: List[int] = None, width=300, re
         la.append(l[:6]+add)
     fig, axs = plt.subplots(N, 1, figsize=(14, max(5, N*1.6)))
 
-    axs[0].set_xticks(*make_ticks(w[-1]))
+    make_ticks(ax, w[-1])
     for i, (ax, p, l) in enumerate(zip(axs, cp, la)):
         if i == 0:
             ax.plot(w, z, label=l)
@@ -635,7 +649,7 @@ def show_index(path: str, region: Tuple[float, float] = None, st='z', recalc=Fal
     for ax in axs:
         if region is None:
             # ax.set_xlim(*region)
-            ax.set_xticks(*make_ticks(w[-1]))
+            make_ticks(ax, w[-1])
         ax.grid()
         ax.legend()
     name = 'index_'+label
